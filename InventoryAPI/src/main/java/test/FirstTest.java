@@ -1,5 +1,5 @@
 package test;
-
+//
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -117,6 +117,8 @@ public class FirstTest {
     
     }
     
+    
+    
     //TODO Remove all test code before final push
     /* WarehouseRemoveExpired
      * Updates all warehouseItem where experation date < "now" to locaitonID disposed
@@ -178,4 +180,39 @@ public class FirstTest {
     
     }
     
+
+
+/*
+OrderStatus( int OrderID)
+Description: OrderID is the id given from making the order. Returns a table of the order’s ID, date made, third-party tracking number, and status.
+
+
+ * */
+
+/***
+ * @author ahmed
+ * @apiNote still working on this...
+ */
+public void orderStatus(int orderID) {
+	String orderStatus = "select order_table.id, order_table.date, tracking_number, "
+			+ "description from order_table join order_status on (order_status.id = order_table.status) "
+			+ "order by order_table.date limit 10;";
+	try(Connection conn = DriverManager.getConnection(DB_Address, USER, PASS);){
+		try(Statement stmt = conn.createStatement();){
+    		conn.setAutoCommit(false);
+    		conn.rollback();
+    		conn.close();
+            return true;
+        } catch (SQLException e) {
+        	e.printStackTrace();
+			conn.rollback();
+			conn.close();
+			return false;
+        }	// error occurred while establishing connection, return false
+	} catch (SQLException ex) {
+		ex.printStackTrace();
+		return false;
+	}
+
 }
+
