@@ -9,14 +9,14 @@ public class TestRestaurantInventory {
 
     public static void main( String args[] ) throws SQLException {
         
-    	//System.out.println(RestaurantExpireSoon(1, "2022-01-01"));
-    	//System.out.println(RestaurantCheckInventory(2));
-    	//System.out.println(RestaurantUsageReport(3,"2021-01-01","2021-12-01"));
+    	//Test each method
+    	System.out.println(RestaurantExpireSoon(1, "2022-01-01"));
+    	System.out.println(RestaurantCheckInventory(2));
+    	System.out.println(RestaurantUsageReport(3,"2021-01-01","2021-12-01"));
     	System.out.println(RestaurantRemoveExpired(2));
     }
 
-
-	/**
+     /**
      * Check all items will be expired soon
      * @param RestaurantID
      * @param date
@@ -29,15 +29,15 @@ public class TestRestaurantInventory {
     	ArrayList<String> listOfItem = new ArrayList<String>();
  
         String update = "SELECT Restaurant.id, Catalog.name, ExpirationDate, "
-        		+ "RestaurantStatus.name AS Status\n" +
-                "FROM RestaurantItem\n" +
-                "JOIN Restaurant ON (Restaurant.id = RestaurantItem.restaurantId)\n" +
-                "JOIN RestaurantStatus ON (RestaurantStatus.id = RestaurantItem.status)\n" +
-                "JOIN Catalog ON (Catalog.id = RestaurantItem.catalogId)\n" +
-                "WHERE Restaurant.id = " + RestaurantID + "\n" +
-                "AND RestaurantItem.expirationdate > '" + date + "'\n" +
-                "AND RestaurantStatus.id NOT IN ('DS', 'FU')\n" +
-                "ORDER BY expirationDate, name;";
+        				+ "RestaurantStatus.name AS Status\n" +
+            "FROM RestaurantItem\n" +
+            "JOIN Restaurant ON (Restaurant.id = RestaurantItem.restaurantId)\n" +
+            "JOIN RestaurantStatus ON (RestaurantStatus.id = RestaurantItem.status)\n" +
+            "JOIN Catalog ON (Catalog.id = RestaurantItem.catalogId)\n" +
+            "WHERE Restaurant.id = " + RestaurantID + "\n" +
+            "AND RestaurantItem.expirationdate > '" + date + "'\n" +
+            "AND RestaurantStatus.id NOT IN ('DS', 'FU')\n" +
+            "ORDER BY expirationDate, name;";
         // create connection to DB. Has it's own try block to facilitate transactions
         try(Connection conn = DriverManager.getConnection("jdbc:postgresql://" + 
         DB_Address + ":5432/project", USER, PASS);){
@@ -48,33 +48,35 @@ public class TestRestaurantInventory {
         
                 ResultSet rs = stmt.executeQuery(update);
                 while ( rs.next() ) {
-                	int restaurantID = rs.getInt("Id");
-                	String name = rs.getString("Name");
-                	String expirationDate = rs.getString("ExpirationDate");
-                	String status = rs.getString("Status");
-                	System.out.println("RestaurantID = " + restaurantID );
-                    System.out.println( "Name = " + name );
-                    System.out.println( "Expiration Date = " + expirationDate );
-                    System.out.println( "Status = " + status );
-                    System.out.println();
+	            	int restaurantID = rs.getInt("Id");
+	            	String name = rs.getString("Name");
+	            	String expirationDate = rs.getString("ExpirationDate");
+	            	String status = rs.getString("Status");
+	            	System.out.println("RestaurantID = " + restaurantID );
+	                System.out.println( "Name = " + name );
+	                System.out.println( "Expiration Date = " + expirationDate );
+	                System.out.println( "Status = " + status );
+	                System.out.println();
                 listOfItem.add(name);
-                }
+                    }
                 // commit changes. If reached this part no error occurred in insert
                 conn.commit();
                 conn.close();
                 return listOfItem;
+                }
                 // error occurred in insert, rollback transaction and return false
-            } catch (SQLException e) {
+            catch (SQLException e) {
                 e.printStackTrace();
                 conn.rollback();
                 conn.close();
                 return listOfItem;
-            }
+                }
             // error occurred while establishing connection
-        } catch (SQLException ex) {
+           }
+        catch (SQLException ex) {
             ex.printStackTrace();
             return listOfItem;
-        }
+            }
     }
 
     /**
@@ -87,8 +89,7 @@ public class TestRestaurantInventory {
     public static ArrayList<String> RestaurantCheckInventory( int RestaurantID)
     {
     	ArrayList<String> inventory = new ArrayList<String>();
-    	
-    	 String update = "SELECT Restaurant.id, Catalog.name, "
+    	String update = "SELECT Restaurant.id, Catalog.name, "
     	 		+ "RestaurantStatus.name AS Status, COUNT(RestaurantItem.id) AS Num_item\r\n"
     	 		+ "FROM RestaurantItem\r\n"
     	 		+ "JOIN Restaurant ON (Restaurant.id = RestaurantItem.restaurantId)\r\n"
@@ -109,28 +110,29 @@ public class TestRestaurantInventory {
                  
                  ResultSet rs = stmt.executeQuery(update);
                  while ( rs.next() ) {
-                 	int restaurantID = rs.getInt("Id");
-                 	String name = rs.getString("Name");
-                 	String status = rs.getString("Status");
-                 	int numItem = rs.getInt("Num_item");
-                 	System.out.println("RestaurantID = " + restaurantID );
-                     System.out.println( "Name = " + name );
-                     System.out.println( "Quantity = " + numItem );
-                     System.out.println( "Status = " + status );
-                     System.out.println();
-                 inventory.add(name);
-                 }
+					int restaurantID = rs.getInt("Id");
+					String name = rs.getString("Name");
+					String status = rs.getString("Status");
+					int numItem = rs.getInt("Num_item");
+					System.out.println("RestaurantID = " + restaurantID );
+					System.out.println( "Name = " + name );
+					System.out.println( "Quantity = " + numItem );
+					System.out.println( "Status = " + status );
+					System.out.println();
+                    inventory.add(name);
+                    }
                  // commit changes. If reached this part no error occurred in insert
                  conn.commit();
                  conn.close();
                  return inventory;
+                 }
                  // error occurred in insert, rollback transaction and return false
-             } catch (SQLException e) {
+             catch (SQLException e) {
             	 e.printStackTrace();
                  conn.rollback();
                  conn.close();
                  return inventory;
-             }
+                 }
              // error occurred while establishing connection
          } catch (SQLException ex) {
              ex.printStackTrace();
@@ -148,8 +150,7 @@ public class TestRestaurantInventory {
      * @author Jenny Phan
      */
     public static ArrayList<String> RestaurantUsageReport( int RestaurantID, 
-    		String startDate, String endDate)
-    {
+    		String startDate, String endDate){
     	ArrayList<String> report = new ArrayList<String>();
     	String update = "SELECT Restaurant.id, Catalog.name, RestaurantStatus.name AS Status, "
     			+ "COUNT(RestaurantItem.id) AS Num_item\r\n"
@@ -187,13 +188,13 @@ public class TestRestaurantInventory {
                  // commit changes. If reached this part no error occurred in insert
                  conn.commit();
                  conn.close();
-                 return report;
+                 return report;}
                  // error occurred in insert, rollback transaction 
-             } catch (SQLException e) {
+             catch (SQLException e) {
                  conn.rollback();
                  conn.close();
                  return report;
-             }
+                 }
              // error occurred while establishing connection
          } catch (SQLException ex) {
              ex.printStackTrace();
@@ -206,14 +207,14 @@ public class TestRestaurantInventory {
      *  to status “discarded”
      *  @param RestauranID
      *  @param date
-     *  @author Jenny Phan
      *  @return all expired item with "discarded" status
+     *  @author Jenny Phan
      */
     public static ArrayList<String> RestaurantRemoveExpired (int RestaurantID) throws SQLException
     {
     	ArrayList<String> updatedList = new ArrayList<String>();
         String update = "UPDATE RestaurantItem " +
-                "SET Status = 'DS' WHERE ExpirationDate <= 'now' " + 
+                "SET Status = 'DS' WHERE ExpirationDate < 'now' " + 
                 "AND RestaurantID = '" + RestaurantID + "';";
         String testQuery = "SELECT * FROM RestaurantItem WHERE RestaurantID = " + RestaurantID + ";";
         Connection conn = null;
@@ -258,7 +259,6 @@ public class TestRestaurantInventory {
                     System.out.println();
                     updatedList.add(barcode);
     			}
-
                 //commit change
                 //conn.commit();
     			conn.rollback();
