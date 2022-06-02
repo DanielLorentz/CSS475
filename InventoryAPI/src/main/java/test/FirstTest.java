@@ -17,6 +17,8 @@ public class FirstTest {
         Class.forName("org.postgresql.Driver");
         test();
         System.out.println("exit test method.");
+        
+        /*
         boolean result = WarehouseRemoveExpired();
         System.out.println(result);
         
@@ -40,6 +42,10 @@ public class FirstTest {
         
         System.out.println("checking the status of an order, given orderid = 5");
         orderStatus(5);
+        */
+        System.out.println("checking makeOrder for resteruant 1");
+        int result4 = makeOrder(1);
+        System.out.println("Order number = " + result4);
         
         
     }
@@ -419,16 +425,16 @@ public static boolean AddCatalogItem(String catalogName, String catalogDescripti
  * Description: Restaurant creates an order with its restaurantID. 
  * Returns the order id if successfully placed. 
  * */
-public static boolean makeOrder( int restaurantID) {
-	String update = "INSERT Order_table"
-			+ "VALUES ('" + restaurantID + "')" ;
-	String testQuery = "Select restaurantItem.id,  arrivaldate,  expirationdate, barcode\r\n"
-			+ "from order_table \r\n"
-			+ "Join restaurantItem on (order_table.id = restaurantItem.id )\r\n"
-			+ "Where restaurantItem.id = ' " + restaurantID + "'\r\n"
-			+ "Order by restaurantItem.id desc\r\n"
-			+ "Limit 10;\r\n"
-			+ "";
+public static int makeOrder( int restaurantID) {
+	String update = "INSERT INTO Order_table (restaurantID, date, status)"
+			+ "VALUES ('" + restaurantID + "', now()::TimeStamp(0), 'PL')" ;
+	String testQuery = "SELECT id,  date,  tracking_number, status, restaurantID "
+			+ "FROM order_table "
+			+ "Where restaurantID = ' " + restaurantID + "' "
+			+ "Order by id desc "
+			+ "Limit 10";
+	String resultQuery = "SELECT id FROM order_table WHERE restaurantID = '" + restaurantID + "' ORDER BY id DESC LIMIT 1";
+	int returnOrderNumber = -1;
 	// create connection to DB. Has it's own try block to facilitate transactions
 	try(Connection conn = DriverManager.getConnection(DB_Address, USER, PASS);){
 		// generate statement 
@@ -441,42 +447,48 @@ public static boolean makeOrder( int restaurantID) {
     			ResultSet rs = stmt.executeQuery(testQuery);
     			while(rs.next()) {
     				System.out.print("id = " + rs.getString("id"));
-    				System.out.print(", arrivaldate = " + rs.getDate("arrivaldate"));
-    				System.out.print(", expirationDate = " + rs.getDate("expirationDate"));
-    				System.out.print(", barcode = " + rs.getString("barcode"));
+    				System.out.print(", date = " + rs.getDate("date"));
+    				System.out.print(", tracking_number = " + rs.getString("tracking_number"));
+    				System.out.print(", status = " + rs.getString("status"));
+    				System.out.print(", restaurantID = " + rs.getString("restaurantID"));
     				System.out.println();
     			}
     		//execute insert. Note: JBDC uses the same method call for updates and inserts
     		System.out.println("update");
     		stmt.executeUpdate(update); 
+    		rs = stmt.executeQuery(resultQuery);
+    		rs.next();
+    		returnOrderNumber = rs.getInt("id");
     		
     			//TESTING QUERY!!!!!
 	    		System.out.println("second test query");
 	    		rs = stmt.executeQuery(testQuery);
-    			while(rs.next()) {
+	    		while(rs.next()) {
     				System.out.print("id = " + rs.getString("id"));
-    				System.out.print(", arrivaldate = " + rs.getDate("arrivaldate"));
-    				System.out.print(", expirationDate = " + rs.getDate("expirationDate"));
-    				System.out.print(", barcode = " + rs.getString("barcode"));
+    				System.out.print(", date = " + rs.getDate("date"));
+    				System.out.print(", tracking_number = " + rs.getString("tracking_number"));
+    				System.out.print(", status = " + rs.getString("status"));
+    				System.out.print(", restaurantID = " + rs.getString("restaurantID"));
     				System.out.println();
     			}
+    			
             // commit changes. If reached this part no error occurred in insert
             //conn.commit();
     		conn.rollback(); //TODO:: comment this out and return to commit. set up this way for testing due to annoyance in resetting all table data
     		//return true
     		conn.close();
-            return true;
+            return returnOrderNumber;
         // error occurred in insert, rollback transaction and return false
         } catch (SQLException e) {
         	e.printStackTrace();
 			conn.rollback();
 			conn.close();
-			return false;
+			return returnOrderNumber;
         }
 	// error occurred while establishing connection, return false
 	} catch (SQLException ex) {
 		ex.printStackTrace();
-		return false;
+		return returnOrderNumber;
 	}
 
 }
