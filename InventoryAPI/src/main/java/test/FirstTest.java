@@ -5,6 +5,7 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Scanner;
 
 public class FirstTest {
     static final String DB_Address = "jdbc:postgresql://73.59.46.239:5432/project";
@@ -17,36 +18,160 @@ public class FirstTest {
         Class.forName("org.postgresql.Driver");
         test();
         System.out.println("exit test method.");
+
         
-        /*
-        boolean result = WarehouseRemoveExpired();
-        System.out.println(result);
         
-        System.out.println("getting the order status: for ID 10");
-        orderStatus(10);
+        String resultS = "";
+        int resultI = 0;
+        boolean resultB = false;
+        // input vars
+        int restaurantId, orderId, catalogId, quantity;
+        String name, description, status, id, trackingNumber, expirationDate, barcode, locationId;
         
-        System.out.println("checking expired orders with resturant id = 5");
-        restaurantExpired(5);
-        
-        //System.out.println("Restaurant creates an order with restaurantID = 5");
-        //boolean result2 = makeOrder(5);
-        
-        //System.out.println(result2); 
-        //-- getting an error when I tried to run the query, 
-        //some of the fields are becoming null for some reason. 
-        //not sure how to fix it...
-        
-        System.out.println("adding an order of id = , catalogid = 3, and quantity of 10");
-        boolean result3 = addToOrder(2, 3, 10);
-        System.out.println(result3);
-        
-        System.out.println("checking the status of an order, given orderid = 5");
-        orderStatus(5);
-        */
-        System.out.println("checking makeOrder for resteruant 1");
-        int result4 = makeOrder(1);
-        System.out.println("Order number = " + result4);
-        
+        // create scanner for UI input
+        Scanner in = new Scanner(System.in);
+        int nextInput = 20;
+        while(nextInput != 0) {
+        	switch (nextInput) {
+        		// AddCatalogItem
+        		case 1: 	name = in.next();
+        					description = in.next();
+        					if(AddCatalogItem(name, description)) {
+        						System.out.println("Item added to catalog");
+        					} else {
+        						System.out.println("Item not added, please check inputs and try again");
+        					}
+	        				break;
+        		// MakeOrder
+        		case 2: 	restaurantId = in.nextInt();
+        					int result = makeOrder(restaurantId);
+        					if (result > -1) {
+        						System.out.println("Order number = " + result);
+        					} else {
+        						System.out.println("Order not made, please check inputs and try again");
+        					}
+	        				break;
+        		// AddToOrder
+        		case 3: 	orderId = in.nextInt();
+        					catalogId = in.nextInt();
+        					quantity = in.nextInt();
+        					if(addToOrder(orderId, catalogId, quantity)) {
+        						System.out.println("Items added to order");
+        					} else {
+        						System.out.println("Items not added to order");
+        					}
+	        				break;
+        		// OrderStatus
+	        	case 4: 	orderId = in.nextInt();
+	        				orderStatus(orderId);
+	        				break;
+        		// UpdateStatus
+        		case 5:		restaurantId = in.nextInt();
+        					barcode = in.next();
+        					status = in.next();
+        					status.toUpperCase();
+        					if(updateStatus(restaurantId, barcode, status)) {
+        						System.out.println("Item status updated");
+        					} else {
+        						System.out.println("Item status not updated, please check inputs and try again");
+        					}
+	        				break;
+        		// UpdateLocation
+        		case 6:		locationId = in.next();
+        					barcode = in.next();
+        					updateLocation(locationId, barcode);
+        					System.out.println("Item location updated");
+	        				break;
+        		// UpdateRestaurantItem
+        		case 7:		barcode = in.next();
+        					expirationDate = in.next();
+        					if(updateRestaurantItem(barcode, expirationDate)) {
+        						System.out.println("Item updated");
+        					} else {
+        						System.out.println("Item not updated, please check inputs");
+        					}
+	        				break;
+        		// RestaurantExpired
+	        	case 8:		restaurantId = in.nextInt();
+	        				restaurantExpired(restaurantId);
+	        				break;
+        		// RestaurantExpireSoon
+        		case 9:		
+        					break;
+        		// RestaurantCheckInventory
+        		case 10:	
+        					break;
+        		// RestaurantUsageReport
+        		case 11:	
+        					break;
+        		// RestaurantRemoveExpired
+        		case 12:	
+        					break;
+        		// WarehouseCheckInventory
+        		case 13:	
+        					break;
+        		// WarehouseUpdateLocation
+        		case 14:	
+        					break;
+        		// WarehouseExpired
+        		case 15:	
+        					break;
+        		// WarehouseExpireSoon
+        		case 16:	
+        					break;
+        		// WarehouseAddInventory
+        		case 17:	catalogId = in.nextInt();
+        					barcode = in.next();
+        					expirationDate = in.next();
+        					if(warehouseAddItem(catalogId, barcode, expirationDate)) {
+        						System.out.println("Item added to warehouse inventory");
+        					} else {
+        						System.out.println("Item not added to warehouse inventory, please check inputs and try again");
+        					}
+        					break;
+        		// AddTrackingNumber
+        		case 18:	orderId = in.nextInt();
+        					trackingNumber = in.next();
+        					if(addTrackingNumber(orderId, trackingNumber)) {
+        						System.out.println("Tracking number added to order");
+        					} else {
+        						System.out.println("An error occured while adding the tracking number, please check your inputs and try again");
+        					}
+        					break;
+        		// WarehouseRemoveExpired
+        		case 19:	if(warehouseRemoveExpired()) {
+        						System.out.println("LocationID for all expired items in the warehouse changed to garbage");
+        					} else {
+        						System.out.println("An error occured, please try again");
+        					}
+        					break;
+        		// Options
+        		case 20:	System.out.println("Please enter the number for one of the following options and then give the arguments in order:");
+        					System.out.println("      0: quit demo");
+        					System.out.println("      1: addCatalogItem(name, description)");
+        					System.out.println("      2: makeOrder(restaurantID)");
+        					System.out.println("      3: addToOrder(orderID, catalogID, quantity)");
+        					System.out.println("      4: orderStatus(orderID)");
+        					System.out.println("      5: updateStatus(restaurantID, barcode, (char(2)) status)");
+        					System.out.println("      6: updateLocation((char(2)) ID, barcode)");
+        					System.out.println("      7: updateRestaurantItem(barcode, expirationDate)");
+        					System.out.println("      8: restaurantExpired(restaurantID)");
+        					System.out.println("      9: restaurantExpireSoon(restaurantID, date)");
+        					System.out.println("     10: restaurantCheckInventory(restaurantID)");
+        					System.out.println("     11: restaurantUsageReport(restaurantID, startDate, endDate");
+        					System.out.println("     12: restaurantRemoveExpired(restaurantID)");
+        					System.out.println("     13: warehouseCheckInventory()");
+        					System.out.println("     14: warehouseUpdateLocation(barcode, (char(2)) locationID)");
+        					System.out.println("     15: warehouseExpired()");
+        					System.out.println("     16: warehouseExpireSoon(date)");
+        					System.out.println("     17: warehouseAddInventory(catalogID, barcode, expirationDate)");
+        					System.out.println("     18: addTrackingNumber(orderID, trackingNumber)");
+        					System.out.println("     19: warehouseRemoveExpired()");
+        					System.out.println("     20: review available options");
+        					break;
+        	}
+        	nextInput = in.nextInt();
+        }
         
     }
     
@@ -78,7 +203,7 @@ public class FirstTest {
      * @returns bool. true if successful
      * Author: Daniel Lorentz
      */
-    public static boolean WarehouseAddItem(int catalogID, String barcode, String exirationDate){
+    public static boolean warehouseAddItem(int catalogID, String barcode, String exirationDate){
     	// construct CRUD insert
     	String update = "INSERT INTO warehouseItem (barcode, locationID, catalogID, arrivalDate, expirationDate)"
     			+ "VALUES ('" + barcode +"', 'DB', '" + catalogID + "', now()::TimeStamp(0), '" + exirationDate + "')"; 
@@ -116,7 +241,7 @@ public class FirstTest {
      * @returns bool. true if successful
      * Author: Daniel Lorentz
      */
-    public static boolean AddTrackingNumber(int catalogID, String trackingNumber){
+    public static boolean addTrackingNumber(int catalogID, String trackingNumber){
     	String update = "UPDATE order_table SET tracking_number = '" + trackingNumber + "', status = 'SH' WHERE id = " + catalogID;
     	// create connection to DB. Has it's own try block to facilitate transactions
     	try(Connection conn = DriverManager.getConnection(DB_Address, USER, PASS);){
@@ -152,7 +277,7 @@ public class FirstTest {
      * @returns bool. true if successful
      * Author: Daniel Lorentz
      */
-    public static boolean WarehouseRemoveExpired(){
+    public static boolean warehouseRemoveExpired(){
     	String update = "UPDATE warehouseItem SET locationID = 'GB' WHERE warehouseItem.expirationDate <= now() AND locationID != 'SH' AND locationID != 'GB'";
     	String testQuery = "SELECT * FROM warehouseItem WHERE warehouseItem.expirationDate <= 'now' AND (locationID != 'SH' AND locationID != 'GB') LIMIT 10";
     	// create connection to DB. Has it's own try block to facilitate transactions
@@ -251,7 +376,7 @@ public static void orderStatus(int orderID){
  * @param status = char denoting the status of current order
 
  */
-public static boolean updateStatus(int resturantID, String barcode, char status){
+public static boolean updateStatus(int resturantID, String barcode, String status){
 	String update = "UPDATE RestaurantItem SET status = ' " + status + " 'WHERE Barcode = '" + barcode + "' AND restaurantID =  '" + resturantID + "'";
 	 //= '" + trackingNumber + "'
 	// create connection to DB. Has it's own try block to facilitate transactions
@@ -290,7 +415,7 @@ public static boolean updateStatus(int resturantID, String barcode, char status)
  * @param  Barcode = String unique for every item 
  * @param status = char denoting the status of current order
  */
-public static void updateLocation(char resturantLocationID, String barcode){
+public static void updateLocation(String resturantLocationID, String barcode){
 	String update = "UPDATE RestaurantItem SET locationID = '" + resturantLocationID + " 'Where Barcode = ' "  + resturantLocationID + " '";
 
 	// create connection to DB. Has it's own try block to facilitate transactions
@@ -328,7 +453,7 @@ public static void updateLocation(char resturantLocationID, String barcode){
  * @param expirationDate = date expirationDate of a restaurantItem
  * @param  Barcode = String unique for every item 
  */
-public static boolean UpdateRestaurantItem(String barcode, String expirationDate){
+public static boolean updateRestaurantItem(String barcode, String expirationDate){
 	String update = "Update RestaurantItem SET expirationDate =  '" + expirationDate + "' WHERE Barcode = " + barcode;
 	// create connection to DB. Has it's own try block to facilitate transactions
 	try(Connection conn = DriverManager.getConnection(DB_Address, USER, PASS);){
