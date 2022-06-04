@@ -27,8 +27,8 @@ public class Tester {
 		String barcode = "31068494";
 		// DB, SB, NS, CS, FS, SH, GB
 		String locationID = "GB";
-//		System.out.println(wi.warehouseUpdateLocation(barcode, locationID));
-		System.out.println(wi.validLocationID(locationID));
+		System.out.println(wi.warehouseUpdateLocation(barcode, locationID));
+//		System.out.println(wi.validLocationID(locationID));
 	}
 	
 	public static void testWarehouseExpired() {

@@ -25,7 +25,7 @@ public class WarehouseInventory {
 	private boolean connect() {
 		try {
 			conn = DriverManager.getConnection("jdbc:postgresql://" + DB_Address + ":5432/project", USER, PASS);
-			System.out.println("Connection Established.");
+			println("Connection Established.");
 			return true;
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -106,8 +106,8 @@ public class WarehouseInventory {
 	 * @return True if updated successfully
 	 */
 	public boolean warehouseUpdateLocation(String barcode, String locationID) {
-		if (!connect()) return false;
 		if (!validLocationID(locationID)) return false;
+		if (!connect()) return false;
 		String update = "UPDATE WarehouseItem\r\n"
 				+ "SET LocationID = ?\r\n"
 				+ "WHERE Barcode = ?;";
@@ -130,7 +130,7 @@ public class WarehouseInventory {
 		}
 	}
 	
-	public boolean validLocationID(String locationID) {
+	private boolean validLocationID(String locationID) {
 		if (!connect()) return false;
 		String query = "SELECT FROM WarehouseLocation\r\n"
 				+ "WHERE ID = ?\r\n;";
