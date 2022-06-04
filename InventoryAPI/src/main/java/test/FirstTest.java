@@ -5,6 +5,8 @@ import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.InputMismatchException;
 import java.util.Scanner;
 
 public class FirstTest {
@@ -16,25 +18,28 @@ public class FirstTest {
     public static void main (String[] args) throws ClassNotFoundException { 
         // open connection
         Class.forName("org.postgresql.Driver");
+        
+        TestRestaurantInventory restJ = new TestRestaurantInventory();
         test();
         System.out.println("exit test method.");
 
         
         
-        String resultS = "";
-        int resultI = 0;
-        boolean resultB = false;
+        ArrayList<String> res = new ArrayList<String>();
         // input vars
         int restaurantId, orderId, catalogId, quantity;
-        String name, description, status, id, trackingNumber, expirationDate, barcode, locationId;
+        String name, description, status, startDate, trackingNumber, expirationDate, barcode, locationId;
         
         // create scanner for UI input
         Scanner in = new Scanner(System.in);
         int nextInput = 20;
         while(nextInput != 0) {
+        	try {
         	switch (nextInput) {
         		// AddCatalogItem
-        		case 1: 	name = in.next();
+        		case 1: 	System.out.print("Catalog item name: ");
+        					name = in.next();
+        					System.out.print("Catalog item description: ");
         					description = in.next();
         					if(AddCatalogItem(name, description)) {
         						System.out.println("Item added to catalog");
@@ -43,7 +48,8 @@ public class FirstTest {
         					}
 	        				break;
         		// MakeOrder
-        		case 2: 	restaurantId = in.nextInt();
+        		case 2: 	System.out.print("RestaurantID: ");
+        					restaurantId = in.nextInt();
         					int result = makeOrder(restaurantId);
         					if (result > -1) {
         						System.out.println("Order number = " + result);
@@ -52,8 +58,11 @@ public class FirstTest {
         					}
 	        				break;
         		// AddToOrder
-        		case 3: 	orderId = in.nextInt();
+        		case 3: 	System.out.print("OrderID: ");
+        					orderId = in.nextInt();
+        					System.out.print("CatalogID: ");
         					catalogId = in.nextInt();
+        					System.out.print("Quantity: ");
         					quantity = in.nextInt();
         					if(addToOrder(orderId, catalogId, quantity)) {
         						System.out.println("Items added to order");
@@ -62,12 +71,16 @@ public class FirstTest {
         					}
 	        				break;
         		// OrderStatus
-	        	case 4: 	orderId = in.nextInt();
+	        	case 4: 	System.out.print("OrderID: ");
+	        				orderId = in.nextInt();
 	        				orderStatus(orderId);
 	        				break;
         		// UpdateStatus
-        		case 5:		restaurantId = in.nextInt();
+        		case 5:		System.out.print("RestaurantID: ");
+        					restaurantId = in.nextInt();
+        					System.out.print("Barcode (int 10): ");
         					barcode = in.next();
+        					System.out.print("Status (Char 2): ");
         					status = in.next();
         					status.toUpperCase();
         					if(updateStatus(restaurantId, barcode, status)) {
@@ -77,13 +90,18 @@ public class FirstTest {
         					}
 	        				break;
         		// UpdateLocation
-        		case 6:		locationId = in.next();
+        		case 6:		System.out.print("LocationID (Char 2):");
+        					locationId = in.next();
+        					locationId.toUpperCase();
+        					System.out.print("Barcode (int 10): ");
         					barcode = in.next();
         					updateLocation(locationId, barcode);
         					System.out.println("Item location updated");
 	        				break;
         		// UpdateRestaurantItem
-        		case 7:		barcode = in.next();
+        		case 7:		System.out.print("Barcode (int 10): ");
+        					barcode = in.next();
+        					System.out.print("ExpirationDate ('YYYY-MM-DD'): ");
         					expirationDate = in.next();
         					if(updateRestaurantItem(barcode, expirationDate)) {
         						System.out.println("Item updated");
@@ -92,20 +110,39 @@ public class FirstTest {
         					}
 	        				break;
         		// RestaurantExpired
-	        	case 8:		restaurantId = in.nextInt();
+	        	case 8:		System.out.print("RestaurantID: ");
+	        				restaurantId = in.nextInt();
 	        				restaurantExpired(restaurantId);
 	        				break;
         		// RestaurantExpireSoon
-        		case 9:		
+        		case 9:		System.out.print("RestaurantID: ");
+        					restaurantId = in.nextInt();
+        					System.out.print("Date ('YYYY-MM-DD'): ");
+        					expirationDate = in.next();
+        					res = TestRestaurantInventory.RestaurantExpireSoon(restaurantId, expirationDate);
+        					System.out.println(res);
         					break;
         		// RestaurantCheckInventory
-        		case 10:	
+        		case 10:	System.out.print("RestaurantID: ");
+        					restaurantId = in.nextInt();
+        					res = TestRestaurantInventory.RestaurantCheckInventory(restaurantId);
+        					System.out.println(res);
         					break;
         		// RestaurantUsageReport
-        		case 11:	
+        		case 11:	System.out.print("RestaurantID: ");
+        					restaurantId = in.nextInt();
+        					System.out.print("Start date ('YYYY-MM-DD'): ");
+        					startDate = in.next();
+        					System.out.print("End date ('YYYY-MM-DD'): ");
+        					expirationDate = in.next();
+        					res = TestRestaurantInventory.RestaurantUsageReport(restaurantId, startDate, expirationDate);
+        					System.out.println(res);
         					break;
         		// RestaurantRemoveExpired
-        		case 12:	
+        		case 12:	System.out.print("RestaurantID: ");
+        					restaurantId = in.nextInt();
+        					res = TestRestaurantInventory.RestaurantRemoveExpired(restaurantId);
+        					System.out.print(res);
         					break;
         		// WarehouseCheckInventory
         		case 13:	
@@ -120,8 +157,11 @@ public class FirstTest {
         		case 16:	
         					break;
         		// WarehouseAddInventory
-        		case 17:	catalogId = in.nextInt();
+        		case 17:	System.out.print("CatalogID :");
+        					catalogId = in.nextInt();
+        					System.out.print("Barcode (int 10): ");
         					barcode = in.next();
+        					System.out.print("ExpirationDate ('YYYY-MM-DD'): ");
         					expirationDate = in.next();
         					if(warehouseAddItem(catalogId, barcode, expirationDate)) {
         						System.out.println("Item added to warehouse inventory");
@@ -130,7 +170,9 @@ public class FirstTest {
         					}
         					break;
         		// AddTrackingNumber
-        		case 18:	orderId = in.nextInt();
+        		case 18:	System.out.print("OrderID: ");
+        					orderId = in.nextInt();
+        					System.out.print("TrackingNumber: ");
         					trackingNumber = in.next();
         					if(addTrackingNumber(orderId, trackingNumber)) {
         						System.out.println("Tracking number added to order");
@@ -171,6 +213,10 @@ public class FirstTest {
         					break;
         	}
         	nextInput = in.nextInt();
+        	
+        }catch (InputMismatchException ei) {
+        	nextInput = in.nextInt();
+        }
         }
         
     }
