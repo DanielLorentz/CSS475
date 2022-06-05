@@ -8,15 +8,16 @@ public class TestRestaurantInventory {
     static final String PASS = "12345678";
 
     public static void main( String args[] ) throws SQLException {
-        
+    	
     	//Test each method
     	System.out.println(RestaurantExpireSoon(1, "2022-01-01"));
     	System.out.println(RestaurantCheckInventory(2));
     	System.out.println(RestaurantUsageReport(3,"2021-01-01","2021-12-01"));
     	System.out.println(RestaurantRemoveExpired(2));
     }
+    
 
-     /**
+	/**
      * Check all items will be expired soon
      * @param RestaurantID
      * @param date
