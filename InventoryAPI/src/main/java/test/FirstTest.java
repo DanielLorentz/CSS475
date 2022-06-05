@@ -1,6 +1,7 @@
 package test;
 //
 import java.sql.Connection;
+import java.sql.Date;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -9,10 +10,13 @@ import java.util.ArrayList;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
+import CSS475.WarehouseInventory;
+
 public class FirstTest {
     static final String DB_Address = "jdbc:postgresql://73.59.46.239:5432/project";
     static final String USER = "inventory";
     static final String PASS = "12345678";
+    static final WarehouseInventory wi = new WarehouseInventory();
 
     //
     public static void main (String[] args) throws ClassNotFoundException { 
@@ -145,19 +149,45 @@ public class FirstTest {
         					System.out.print(res);
         					break;
         		// WarehouseCheckInventory
-        		case 13:	
+        		case 13:	System.out.println("Number of items to display: ");
+        					int toDisplay = in.nextInt();
+        					for (ArrayList<String> i : wi.warehouseCheckInventory(0, toDisplay)) {
+        						System.out.println(i);
+        					}
         					break;
         		// WarehouseUpdateLocation
-        		case 14:	
+        		case 14:	System.out.println("Barcode (int 10): ");
+        					barcode = in.next();
+        					System.out.println("New LocationID: ");
+        					String newLocationID = in.next().toUpperCase();
+        					boolean valid = wi.validLocationID(newLocationID);
+        					while(!valid) {
+        						System.out.println("Invalid LocationID. Try again.");
+        						System.out.println("New LocationID: ");
+            					newLocationID = in.next();
+            					valid = wi.validLocationID(newLocationID);
+        					}
+        					if (wi.warehouseUpdateLocation(barcode, newLocationID)) {
+        						System.out.println("Item location successfully updated.");
+        					} else {
+        						System.out.println("Item not found. Failed to update item location.");
+        					}
         					break;
         		// WarehouseExpired
         		case 15:	
+        					for (ArrayList<String> i : wi.warehouseExpired()) {
+        						System.out.println(i);
+        					}
         					break;
         		// WarehouseExpireSoon
-        		case 16:	
+        		case 16:	System.out.println("Date item Expires before (YYYY-MM-DD): ");
+        					String expireBefore = in.next();
+        					for (ArrayList<String> i : wi.warehouseExpireSoon(Date.valueOf(expireBefore))) {
+        						System.out.println(i);
+        					}
         					break;
         		// WarehouseAddInventory
-        		case 17:	System.out.print("CatalogID :");
+        		case 17:	System.out.print("CatalogID:");
         					catalogId = in.nextInt();
         					System.out.print("Barcode (int 10): ");
         					barcode = in.next();
