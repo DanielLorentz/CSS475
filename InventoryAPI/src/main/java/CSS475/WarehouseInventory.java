@@ -106,7 +106,7 @@ public class WarehouseInventory {
 	 * @return True if updated successfully
 	 */
 	public boolean warehouseUpdateLocation(String barcode, String locationID) {
-		if (!validLocationID(locationID)) return false;
+		//if (!validLocationID(locationID)) return false;
 		if (!connect()) return false;
 		String update = "UPDATE WarehouseItem\r\n"
 				+ "SET LocationID = ?\r\n"
@@ -121,7 +121,7 @@ public class WarehouseInventory {
 			println("Lines updated = " + rs);
 			// commit changes. If reached this part no error occurred in insert
 			commit();
-			return true;
+			return rs > 0;
 		}
 		// error occurred in insert, rollback transaction and return false
 		catch (SQLException e) {
@@ -130,7 +130,7 @@ public class WarehouseInventory {
 		}
 	}
 	
-	private boolean validLocationID(String locationID) {
+	public boolean validLocationID(String locationID) {
 		if (!connect()) return false;
 		String query = "SELECT FROM WarehouseLocation\r\n"
 				+ "WHERE ID = ?\r\n;";
